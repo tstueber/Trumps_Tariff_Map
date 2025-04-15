@@ -1118,16 +1118,6 @@
       "TBD"
     ]
   },
-  "Nicaragua": {
-    "tariff_rate": 18,
-    "tariff_charged_to_us": 36,
-    "impacted_goods": [
-      "TBD"
-    ],
-    "companies": [
-      "TBD"
-    ]
-  },
   "Niger": {
     "tariff_rate": 10,
     "tariff_charged_to_us": 10,
@@ -1204,16 +1194,6 @@
       "Hanesbrands (HBI)",
       "PVH Corp (PVH)",
       "Adidas (ADDYY)"
-    ]
-  },
-  "Panama": {
-    "tariff_rate": 10,
-    "tariff_charged_to_us": 10,
-    "impacted_goods": [
-      "TBD"
-    ],
-    "companies": [
-      "TBD"
     ]
   },
   "Papua New Guinea": {
@@ -1594,16 +1574,6 @@
       "Honeywell (HON)"
     ]
   },
-  "Timor-Leste": {
-    "tariff_rate": 10,
-    "tariff_charged_to_us": 10,
-    "impacted_goods": [
-      "TBD"
-    ],
-    "companies": [
-      "TBD"
-    ]
-  },
   "Togo": {
     "tariff_rate": 10,
     "tariff_charged_to_us": 10,
@@ -1943,14 +1913,6 @@
   "exempted_goods": ["Broad coverage for goods; part of U.S. strategy for economic ties in the Gulf."],
   "companies": ["TBD"]
 },
-"Singapore": {
-  "tariff_rate": 10,
-  "tariff_charged_to_us": 10,
-  "fta_exempt": true,
-  "impacted_goods": ["Electronics", "Chemicals", "Financial Services"],
-  "exempted_goods": ["Electronics", "Chemicals", "Most goods qualify for duty-free status if meeting origin rules."],
-  "companies": ["Flex (FLEX)", "Seagate (STX)", "DBS Group"]
-},
 "Chile": {
   "tariff_rate": 10,
   "tariff_charged_to_us": 10,
@@ -2004,12 +1966,6 @@
   "tariff_charged_to_us": 20,
   "impacted_goods": ["Coffee", "Cashews", "Minerals"],
   "companies": ["Tanzania Coffee Board", "Acacia Mining", "TANESCO"]
-},
-"Denmark": {
-  "tariff_rate": 20,
-  "tariff_charged_to_us": 25,
-  "impacted_goods": ["Pharma", "Renewable Energy Equipment", "Pork"],
-  "companies": ["Novo Nordisk", "Vestas", "Carlsberg"]
 },
 "Somaliland": {
   "tariff_rate": 10,
@@ -2282,6 +2238,32 @@
   "companies": ["Volvo", "AstraZeneca", "Ericsson"],
   "eu_member": true
 },
+"Timor-Leste": {
+  "tariff_rate": 10,
+  "tariff_charged_to_us": 10,
+  "impacted_goods": [
+    "Coffee",
+    "Textiles",
+    "Handicrafts"
+  ],
+  "companies": [
+    "Timor Global",
+    "Cooperativa Café Timor"
+  ]
+},
+"French Southern and Antarctic Lands": {
+  "tariff_rate": 10,
+  "tariff_charged_to_us": 10,
+  "impacted_goods": [
+    "Scientific Equipment",
+    "Marine Supplies",
+    "Logistics"
+  ],
+  "companies": [
+    "TAAF Logistics",
+    "French Polar Institute"
+  ]
+},
 "United States of America": {
   "tariff_rate": 0,
   "tariff_charged_to_us": 0,
@@ -2343,7 +2325,6 @@
           onEachFeature: (feature, layer) => {
             const country = feature.properties.name;
             const data = tariffData[country];
-
             layer.on({
               mouseover: function (e) {
                 e.target.setStyle({
@@ -2359,34 +2340,36 @@
               click: function () {
                 if (data) {
                   const exemptionText = data.usmca_exempt
-                    ? 'USMCA treaty exemption applies to some goods'
-                    : data.fta_exempt
-                    ? 'FTA exemption applies to some goods'
-                    : '';
-                  const sanctionNote = data.note ? `<p><em>${data.note}</em></p>` : '';
+                  ? 'USMCA treaty exemption applies to some goods'
+                  : data.fta_exempt
+                  ? 'FTA exemption applies to some goods'
+                  : '';
                   const exemptedGoodsText = data.exempted_goods && data.exempted_goods.length > 0
-                    ? `<p><strong>Exempted Goods:</strong> ${data.exempted_goods.join(", ")}</p>`
-                    : '';
-
-                  const popupContent = `
-                  <div>
-                    <h3>${country}</h3>
-                    <p><strong>Tariff Rate:</strong> ${data.tariff_rate}%</p>
-                    <p><strong>Impacted Goods:</strong> ${data.impacted_goods.join(", ")}</p>
-                    <p><strong>Companies:</strong> ${data.companies.join(", ")}</p>
-                    ${exemptionText ? `<p><em>${exemptionText}</em></p>` : ''}
-                    ${exemptedGoodsText}
-                    ${sanctionNote}
-                    </div>
-                  `;
-
-                  layer.bindPopup(popupContent).openPopup();
-                } else {
-                  layer.bindPopup(`<h3>${country}</h3><p>No data available.</p>`).openPopup();
-                }
+                  ? `<p><strong>Exempted Goods:</strong> ${data.exempted_goods.join(", ")}</p>`
+                  : '';
+                  const usmcaNote = (country === "Canada" || country === "Mexico") ? `
+                  <p><strong>Note:</strong> Most goods face a 25% tariff, but energy products (e.g., oil, gas) face a lower 10% rate.
+                    Goods that qualify under the <strong>USMCA</strong> can enter duty-free.</p>
+                    ` : "";
+                    const popupContent = `
+                    <div>
+                      <h3>${country}</h3>
+                      <p><strong>Tariff Rate:</strong> ${data.tariff_rate}%</p>
+                      <p><strong>Impacted Goods:</strong> ${data.impacted_goods.join(", ")}</p>
+                      <p><strong>Companies:</strong> ${data.companies.join(", ")}</p>
+                      ${exemptionText ? `<p><em>${exemptionText}</em></p>` : ''}
+                      ${exemptedGoodsText}
+                      ${usmcaNote}
+                      </div>
+                      `;
+                      layer.bindPopup(popupContent).openPopup();
+                    } else {
+                      layer.bindPopup(`<h3>${country}</h3><p>No data available.</p>`).openPopup();
+                    }
+                  }
+                });
               }
-            });
-          }
+
         }).addTo(map);
 
         const legend = L.control({ position: 'bottomright' });
