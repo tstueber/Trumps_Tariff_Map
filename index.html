@@ -6,7 +6,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    #map { height: 100vh; }
+    html, body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    #map-title {
+      flex: 0 0 auto;
+    }
+    #map {
+      flex: 1 1 auto;
+    }
     .legend {
       background: white;
       padding: 10px;
@@ -3537,9 +3548,6 @@
                   `;
 
                   layer.bindPopup(popupContent).openPopup();
-                  setTimeout(() => {
-                    map.panBy([0, -100], { animate: true });
-                  }, 100);
                 } else {
                   layer.bindPopup(`<h3>${country}</h3><p>No data available.</p>`).openPopup();
                 }
