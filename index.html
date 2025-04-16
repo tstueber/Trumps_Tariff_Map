@@ -43,6 +43,15 @@
       font-size: 14px;
       color: #555;
     }
+    .leaflet-popup-content-wrapper {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .leaflet-popup-content {
+      max-height: 280px;
+      overflow-y: auto;
+    }
   </style>
 </head>
 <body>
@@ -3441,7 +3450,7 @@
               mouseout: function (e) {
                 geojson.resetStyle(e.target);
               },
-              click: function () {
+              click: function (e) {
                 if (data) {
                   const exemptionText = data.usmca_exempt
                   ? 'USMCA treaty exemption applies to some goods'
@@ -3454,40 +3463,54 @@
                   const countryNotesText = data["Country Specific Notes"] && data["Country Specific Notes"].length > 0
                   ? `<p><strong>Country Specific Notes:</strong><ul>${data["Country Specific Notes"].map(note => `<li>${note}</li>`).join("")}</ul></p>`
                   : '';
-
                   const usmcaNote = (country === "Canada" || country === "Mexico") ? `
                   <p><strong>Note:</strong> Most goods face a 25% tariff, but energy products (e.g., oil, gas) face a lower 10% rate.
                     Goods that qualify under the <strong>USMCA</strong> can enter duty-free.</p>
-                    ` : "";
+                  ` : "";
 
+                  const popupContent = `
+                  <div style="width: 300px; font-family: Arial, sans-serif;">
+                    <h3 style="margin-bottom: 10px;">${country}</h3>
+                    <div style="display: flex; margin-bottom: 8px;">
+                      <button class="tab-btn" onclick="showTab(event, 'tariffs-${country}')">Tariffs</button>
+                      <button class="tab-btn" onclick="showTab(event, 'trade-${country}')">Trade & Goods</button>
+                      <button class="tab-btn" onclick="showTab(event, 'notes-${country}')">Notes</button>
+                    </div>
 
-
-                    const popupContent = `
-                    <div>
-                      <h3>${country}</h3>
+                    <div class="tab-content" id="tariffs-${country}" style="display:block;">
                       <p><strong>Tariff Imposed by U.S.:</strong> ${data.tariff_rate}%</p>
                       <p><strong>Tariff Imposed on U.S.:</strong> ${data.tariff_charged_to_us !== undefined ? data.tariff_charged_to_us + '%' : 'N/A'}</p>
+                      ${exemptionText ? `<p><em>${exemptionText}</em></p>` : ''}
+                      ${usmcaNote}
+                    </div>
+
+                    <div class="tab-content" id="trade-${country}" style="display:none;">
                       <p><strong>U.S. Exports to ${country}:</strong> ${data.exports_to_us !== undefined ? '$' + data.exports_to_us.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + 'M' : 'N/A'}</p>
                       <p><strong>U.S. Imports from ${country}:</strong> ${data.imports_from_us !== undefined ? '$' + data.imports_from_us.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + 'M' : 'N/A'}</p>
-
-
-                      <p><strong>Impacted Goods:</strong> ${data.impacted_goods.join(", ")}</p>
-                      <p><strong>Companies:</strong> ${data.companies.join(", ")}</p>
-                      ${exemptionText ? `<p><em>${exemptionText}</em></p>` : ''}
+                      <p><strong>Impacted Goods:</strong> ${data.impacted_goods?.join(", ") || 'N/A'}</p>
+                      <p><strong>Companies:</strong> ${data.companies?.join(", ") || 'N/A'}</p>
                       ${exemptedGoodsText}
-                      ${usmcaNote}
-                      ${countryNotesText}
-                      </div>
-                      `;
+                    </div>
 
-                      layer.bindPopup(popupContent).openPopup();
-                    } else {
-                      layer.bindPopup(`<h3>${country}</h3><p>No data available.</p>`).openPopup();
-                    }
-                  }
+                    <div class="tab-content" id="notes-${country}" style="display:none;">
+                      ${countryNotesText || '<p>No specific notes available.</p>'}
+                      </div>
+                    </div>
+                  `;
+
+                  layer.bindPopup(popupContent).openPopup();
+                  setTimeout(() => {
+                    map.panBy([0, -100], { animate: true });
+                  }, 100);
+                } else {
+                  layer.bindPopup(`<h3>${country}</h3><p>No data available.</p>`).openPopup();
+                }
+              }
+
                 });
               }
         }).addTo(map);
+
 
         const legend = L.control({ position: 'bottomright' });
 
@@ -3519,10 +3542,21 @@
           div.innerHTML = '<h4>Tariff Rate</h4>' + labels.join('<br>');
           return div;
         };
-
-
         legend.addTo(map);
-      });
-  </script>
+  });
+</script>
+
+<script>
+  function showTab(evt, tabId) {
+    const allTabs = evt.currentTarget.parentElement.parentElement.querySelectorAll('.tab-content');
+    allTabs.forEach(tab => tab.style.display = 'none');
+    document.getElementById(tabId).style.display = 'block';
+
+    const buttons = evt.currentTarget.parentElement.querySelectorAll('.tab-btn');
+    buttons.forEach(btn => btn.style.background = '#f0f0f0');
+    evt.currentTarget.style.background = '#ddd';
+  }
+</script>
+
 </body>
 </html>
